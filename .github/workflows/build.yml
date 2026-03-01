@@ -1,0 +1,36 @@
+name: Build EXE
+
+on:
+  push:
+    tags:
+      - 'v*' # v1.0, v1.1 등 태그를 푸시할 때 실행
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install PyQt5 pyinstaller
+
+    - name: Build EXE with PyInstaller
+      run: |
+        pyinstaller --noconfirm --onefile --windowed main.py
+      # --onefile: 파일 하나로 합침 / --windowed: 실행 시 콘솔창 안 뜸
+
+    - name: Release EXE
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/main.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
